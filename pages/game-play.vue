@@ -1,9 +1,11 @@
 <template>
-  <div ref="gamePlay">alo</div>
+  <div>
+    <h3>this is game play</h3>
+    <div ref="gamePlay"></div>
+  </div>
 </template>
 <script lang="ts" setup>
-import Phaser from 'phaser';
-const gamePlay: Ref<HTMLDivElement | string> = ref("");
+const gamePlay: Ref<HTMLDivElement | null> = ref(null);
 const ctx: any = useNuxtApp();
 useHead({
   title: "Game Play",
@@ -13,9 +15,9 @@ onMounted(() => {
     parent: gamePlay.value,
     // @ts-ignore
     type: Phaser.AUTO,
-    width: 220,
-    height: 200,
-    backgroundColor: "#ef4444",
+    width: 100,
+    height: 100,
+    backgroundColor: "red",
     physics: {
       default: "arcade",
       arcade: {
@@ -27,7 +29,7 @@ onMounted(() => {
     },
   };
   // @ts-ignore
-  const game = new Phaser.Game(gameConfig);
-  ctx.$phaser.initialize(game);
+  // const game = new Phaser.Game(gameConfig);
+  new ctx.$phaser.Game(gameConfig);
 });
 </script>

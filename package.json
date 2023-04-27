@@ -12,7 +12,7 @@
     "nuxt": "^3.4.0"
   },
   "dependencies": {
-    "nuxtjs-phaser": "^1.0.17",
+    "@vuestic/nuxt": "^1.0.13",
     "phaser": "^3.60.0"
   }
 }
