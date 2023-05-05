@@ -1,4 +1,4 @@
-## Phase 1
+## Phase 2 - technology
 ## Time estimate
 ## Status
 - Done

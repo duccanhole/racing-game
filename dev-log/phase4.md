@@ -1,11 +1,12 @@
-## Phase 1
+## Phase 4 - develop the core logic game
 ## Time estimate
-- 
+- ~1 month (5/5/2023 - 15/6/2023)
 ## Status
-- Done
+- Doing
 ## Description
-- List of technology I intend to use:
-    - 
-    - Client side: nuxtjs 3
-    - Server side: Nestjs, socket.io
-    - Database: mongodb
+- List of logic game play I want implement in this phase:
+    - Grid map - chessboard
+    - Move the piece into chessboard
+    - Take the piece off the chessboard
+    - Move the piect in chessboard
+    - Select piece to move in chessboard

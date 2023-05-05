@@ -1,8 +1,8 @@
-## Phase 3
+## Phase 3 - client setup
 ## Time estimate
 - one week
 ## Status
-- Doing
+- Done
 ## Description
 - List of to-do task:
     - Init nuxtjs 3 project
