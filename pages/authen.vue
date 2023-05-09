@@ -1,6 +1,7 @@
 <template>
-  <div class="h-screen">
-    <va-form class="flex flex-col w-96 p-3 bg-slate-400">
+  <div class="h-screen flex justify-center">
+    <va-form class="flex flex-col w-96 p-3 bg-slate-400 self-center rounded-md" style="height: 275px">
+      <h4 class="text-center text-3xl">Login</h4>
       <va-input
         label="Email"
         type="email"

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-screen flex flex-col justify-center">
     <div class="flex flex-row justify-center" ref="gamePlay"></div>
   </div>
 </template>
