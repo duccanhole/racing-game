@@ -17,3 +17,4 @@
   - Move the piece in chessboard
   - Select piece to move in chessboard
   - Piece kill other piece on board
+- Make an full demo game play
