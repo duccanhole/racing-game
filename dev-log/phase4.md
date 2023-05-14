@@ -18,3 +18,10 @@
   - Select piece to move in chessboard
   - Piece kill other piece on board
 - Make an full demo game play
+- Update logic: use an game state object to store and control piece
+- The game object has the following role: 
+  - Store data of grid map
+  - Store data of piece in map: position, is my piece or opponent piece
+  - Store state of piece: in board, out board, can move, can kill, ...
+  - Check turn to move: my turn or opponent turn
+  - ...
