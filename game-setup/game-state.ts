@@ -1,11 +1,11 @@
 interface IGrid {
   x: number;
   y: number;
-  piece?: string;
+  piece?: string | null;
 }
 interface IPieceGroup {
   [name: string]: {
-    state: "on-board" | "out-board";
+    state: "on-board" | "out-board" | "finish";
     startPosition: IGrid;
     own: "t1" | "t2";
   };
@@ -14,70 +14,95 @@ export default class GameState {
   mapDataGrid: IGrid[];
   pieces: IPieceGroup;
   moveTurn: "t1" | "t2";
+  userTurn: "t1" | "t2";
   constructor(
     mapDataGrid: IGrid[],
     pieces: IPieceGroup,
-    firstTurn: "t1" | "t2"
+    firstTurn: "t1"|"t2" = "t1",
+    userTurn: "t1" | "t2"
   ) {
     this.mapDataGrid = mapDataGrid;
     this.pieces = pieces;
     this.moveTurn = firstTurn;
+    this.userTurn = userTurn;
   }
-  // logic when click to move an piece
-  // only move when move turn is your
-  // if piece is out board, move to first grid
-  // in normal, piece will move by set new position = current grid + step
-  // if new position has opponent piece, kill it (move opponent piece to start and set move).
-  // if piece reach to the finish point, remove piece and add score for player.
-  // when an piece move success, update move turn.
+  // function handle event user roll dice
+  rollDice(notifyEvt: (value: number) => void) {
+    // you cant roll current turn is not you turn 
+    if(this.userTurn !== this.moveTurn) return;
+    const val = Math.floor(Math.random() * 6) + 1;
+    notifyEvt(val);
+    // check all piece of user can move or not; if not, update turn
+    let check = false;
+    for (const p in this.pieces) {
+      if (this.checkMovePiece(p, val)) {
+        check = true;
+        break;
+      }
+    }
+    if (!check) {
+      this.switchTurn();
+    }
+  }
+  // function handle event user click piece
   movePiece(
     name: string,
     step: number,
     notifyEvt: (name: string, position: IGrid) => void
   ) {
-    // check piece can move or not
+    // check your piece you clicked can move or not
     if (this.checkMovePiece(name, step) === false) return;
     const p = this.pieces[name];
-    let newPosition: IGrid;
     // if user roll dice to 6, move piece to first grid
     if (p.state === "out-board" && step === 6) {
-      newPosition = {
-        x: this.mapDataGrid[0].x,
-        y: this.mapDataGrid[0].y,
-        piece: name,
-      };
       p.state = "on-board";
       notifyEvt(name, this.mapDataGrid[0]);
       this.updatePosition(name, 0);
       return;
     }
     // the current postion of piece
-    const { index: currentIndex, postion: currPosition } =
-      this.getCurrPosition(name);
+    const { index: currentIndex } = this.getCurrPosition(name);
     // the destination postion
     const desPostion = this.mapDataGrid[currentIndex + step];
     // if the destination position has opponent piece, kill it by move that piece to start postion
-    if(desPostion.piece) {
-      
+    if (desPostion.piece) {
+      // move opponent piece to start position
+      const otherP = this.pieces[desPostion.piece];
+      notifyEvt(desPostion.piece, otherP.startPosition);
+      this.updatePosition(null, currentIndex + step);
     }
+    // move your piece to destination position
+    notifyEvt(name, desPostion);
+    this.updatePosition(name, currentIndex + step);
+    // after move piece to destination, remove store piece at current position
+    this.updatePosition(null, currentIndex);
+    // and update turn
+    this.switchTurn()
   }
-  // logic check piece can move
-  // when move turn is your
-  // when no piece of your team in new position
-  // when opponent piece in new position
+  // function check piece can move with number step or not
   checkMovePiece(name: string, step: number): boolean {
+    // you cant move piece if current turn is not your turn
     if (this.pieces[name].own !== this.moveTurn) return false;
+    // you also cant move piece if the destination position has your piece
+    const { index } = this.getCurrPosition(name);
+    const desPostion = this.mapDataGrid[index + step];
+    if(desPostion.piece) {
+      const ownerPiece = this.getPiece(desPostion.piece).own
+      if(ownerPiece === this.userTurn) return false;
+    }
     return true;
   }
   getPiece(name: string) {
     return this.pieces[name];
   }
-  updatePosition(name: string, index: number) {
+  updatePosition(name: string | null, index: number) {
     this.mapDataGrid[index].piece = name;
   }
   getCurrPosition(name: string) {
-    // return this.mapDataGrid.find((p) => p.piece === name);
     const index = this.mapDataGrid.findIndex((p) => p.piece === name);
     return { index, postion: this.mapDataGrid[index] };
+  }
+  switchTurn() {
+    this.moveTurn = this.moveTurn === "t1" ? "t2" : "t1";
   }
 }
