@@ -1,16 +1,16 @@
-interface IGrid {
+export interface IGrid {
   x: number;
   y: number;
   piece?: string | null;
 }
-interface IPieceGroup {
+export interface IPieceGroup {
   [name: string]: {
     state: "on-board" | "out-board" | "finish";
     startPosition: IGrid;
     own: "t1" | "t2";
   };
 }
-export default class GameState {
+export class GameState {
   mapDataGrid: IGrid[];
   pieces: IPieceGroup;
   moveTurn: "t1" | "t2";
@@ -18,8 +18,8 @@ export default class GameState {
   constructor(
     mapDataGrid: IGrid[],
     pieces: IPieceGroup,
-    firstTurn: "t1"|"t2" = "t1",
-    userTurn: "t1" | "t2"
+    userTurn: "t1" | "t2",
+    firstTurn: "t1" | "t2" = "t1"
   ) {
     this.mapDataGrid = mapDataGrid;
     this.pieces = pieces;
@@ -28,8 +28,8 @@ export default class GameState {
   }
   // function handle event user roll dice
   rollDice(notifyEvt: (value: number) => void) {
-    // you cant roll current turn is not you turn 
-    if(this.userTurn !== this.moveTurn) return;
+    // you cant roll current turn is not you turn
+    if (this.userTurn !== this.moveTurn) return;
     const val = Math.floor(Math.random() * 6) + 1;
     notifyEvt(val);
     // check all piece of user can move or not; if not, update turn
@@ -50,6 +50,8 @@ export default class GameState {
     step: number,
     notifyEvt: (name: string, position: IGrid) => void
   ) {
+    // check user rolled or not
+    if (step === 0) return;
     // check your piece you clicked can move or not
     if (this.checkMovePiece(name, step) === false) return;
     const p = this.pieces[name];
@@ -77,7 +79,7 @@ export default class GameState {
     // after move piece to destination, remove store piece at current position
     this.updatePosition(null, currentIndex);
     // and update turn
-    this.switchTurn()
+    this.switchTurn();
   }
   // function check piece can move with number step or not
   checkMovePiece(name: string, step: number): boolean {
@@ -86,9 +88,9 @@ export default class GameState {
     // you also cant move piece if the destination position has your piece
     const { index } = this.getCurrPosition(name);
     const desPostion = this.mapDataGrid[index + step];
-    if(desPostion.piece) {
-      const ownerPiece = this.getPiece(desPostion.piece).own
-      if(ownerPiece === this.userTurn) return false;
+    if (desPostion.piece) {
+      const ownerPiece = this.getPiece(desPostion.piece).own;
+      if (ownerPiece === this.userTurn) return false;
     }
     return true;
   }
