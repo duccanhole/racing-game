@@ -10,11 +10,15 @@ export interface IPieceGroup {
     own: "t1" | "t2";
   };
 }
+export interface INotifyEvt {
+  [name: string]: ((data: any) => void) | Function;
+}
 export class GameState {
   mapDataGrid: IGrid[];
   pieces: IPieceGroup;
   moveTurn: "t1" | "t2";
   userTurn: "t1" | "t2";
+  notifyEvt: INotifyEvt = {};
   constructor(
     mapDataGrid: IGrid[],
     pieces: IPieceGroup,
@@ -26,30 +30,36 @@ export class GameState {
     this.moveTurn = firstTurn;
     this.userTurn = userTurn;
   }
+  registerNotifyEvt(notifyEvt: INotifyEvt) {
+    this.notifyEvt = notifyEvt;
+  }
   // function handle event user roll dice
-  rollDice(notifyEvt: (value: number) => void) {
+  rollDice() {
     // you cant roll current turn is not you turn
     if (this.userTurn !== this.moveTurn) return;
     const val = Math.floor(Math.random() * 6) + 1;
-    notifyEvt(val);
+    // notifyRollEvt(val);
+    console.log("roll:" + val);
     // check all piece of user can move or not; if not, update turn
     let check = false;
+    let isAllPieceOutBoard = true;
     for (const p in this.pieces) {
       if (this.checkMovePiece(p, val)) {
         check = true;
         break;
       }
+      if (this.pieces[p].state === "on-board") isAllPieceOutBoard = false;
     }
+    // user can not move if roll to value not equal 6, and all pieces out board
+    check = isAllPieceOutBoard && val === 6;
     if (!check) {
       this.switchTurn();
+      return;
     }
+    this.onNotifyEvt("roll", val);
   }
   // function handle event user click piece
-  movePiece(
-    name: string,
-    step: number,
-    notifyEvt: (name: string, position: IGrid) => void
-  ) {
+  movePiece(name: string, step: number) {
     // check user rolled or not
     if (step === 0) return;
     // check your piece you clicked can move or not
@@ -57,9 +67,12 @@ export class GameState {
     const p = this.pieces[name];
     // if user roll dice to 6, move piece to first grid
     if (p.state === "out-board" && step === 6) {
-      p.state = "on-board";
-      notifyEvt(name, this.mapDataGrid[0]);
+      this.updateState(name, "on-board");
       this.updatePosition(name, 0);
+      this.onNotifyEvt("move", {
+        name,
+        position: this.mapDataGrid[0],
+      });
       return;
     }
     // the current postion of piece
@@ -70,11 +83,19 @@ export class GameState {
     if (desPostion.piece) {
       // move opponent piece to start position
       const otherP = this.pieces[desPostion.piece];
-      notifyEvt(desPostion.piece, otherP.startPosition);
+      this.onNotifyEvt("move", {
+        name: desPostion.piece,
+        postion: otherP.startPosition,
+      });
       this.updatePosition(null, currentIndex + step);
+      this.updateState(desPostion.piece, "on-board");
     }
     // move your piece to destination position
-    notifyEvt(name, desPostion);
+    // notifyEvt(name, desPostion);
+    this.onNotifyEvt("move", {
+      name,
+      position: desPostion,
+    });
     this.updatePosition(name, currentIndex + step);
     // after move piece to destination, remove store piece at current position
     this.updatePosition(null, currentIndex);
@@ -98,7 +119,12 @@ export class GameState {
     return this.pieces[name];
   }
   updatePosition(name: string | null, index: number) {
-    this.mapDataGrid[index].piece = name;
+    if (name) this.mapDataGrid[index].piece = name;
+    else if (index && this.mapDataGrid[index]?.piece)
+      delete this.mapDataGrid[index].piece;
+  }
+  updateState(name: string, state: "on-board" | "out-board" | "finish") {
+    this.pieces[name].state = state;
   }
   getCurrPosition(name: string) {
     const index = this.mapDataGrid.findIndex((p) => p.piece === name);
@@ -106,5 +132,16 @@ export class GameState {
   }
   switchTurn() {
     this.moveTurn = this.moveTurn === "t1" ? "t2" : "t1";
+    this.onNotifyEvt("switch", this.moveTurn);
+    //this is for testing, need remove in release
+    this.setTurn(this.moveTurn);
+  }
+  onNotifyEvt(eventName: string, data: any = null) {
+    if (this.notifyEvt[eventName]) {
+      this.notifyEvt[eventName](data);
+    }
+  }
+  setTurn(turn: "t1" | "t2") {
+    this.userTurn = turn;
   }
 }

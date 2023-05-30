@@ -134,31 +134,43 @@ export default function gameInit(scene: any) {
   const p4 = scene.add.circle(700, 150, 10, 0x000ff).setInteractive();
   //   const p7 = scene.add.circle(600, 225, 10, 0x0000ff).setInteractive();
   //   const p8 = scene.add.circle(700, 225, 10, 0x0000ff).setInteractive();
-  const gameState = new GameState(mapData, pieceGroup, userTurn);
-  // create dice
-  const dice = scene.add.circle(750, 300, 10, 0xffff00).setInteractive();
-  dice.on("pointerdown", () => {
-    if (step === 0) gameState.rollDice(onRollEvt);
-  });
-  // add event for piece
-  p1.on("pointerdown", () => {
-    gameState.movePiece("p1", step, onMoveEvt);
-  });
-  p2.on("pointerdown", () => {
-    gameState.movePiece("p2", step, onMoveEvt);
-  });
-  p3.on("pointerdown", () => {
-    gameState.movePiece("p3", step, onMoveEvt);
-  });
-  p4.on("pointerdown", () => {
-    gameState.movePiece("p4", step, onMoveEvt);
-  });
   // listen event game state emit
   const onRollEvt = (val: number) => {
     console.log("roll: " + val);
     step = val;
   };
-  const onMoveEvt = (data: any) => {
+  const onMoveEvt = (data: {
+    name: string;
+    position: { x: number; y: number };
+  }) => {
     console.log(data);
   };
+  const onSwitchEvt = (turnData: "t1" | "t2") => {
+    step = 0;
+    userTurn = turnData;
+  };
+  const gameState = new GameState(mapData, pieceGroup, userTurn);
+  gameState.registerNotifyEvt({
+    roll: onRollEvt,
+    move: onMoveEvt,
+    switch: onSwitchEvt,
+  });
+  // create dice
+  const dice = scene.add.circle(750, 300, 10, 0xffff00).setInteractive();
+  dice.on("pointerdown", () => {
+    if (step === 0) gameState.rollDice();
+  });
+  // add event for piece
+  p1.on("pointerdown", () => {
+    gameState.movePiece("p1", step);
+  });
+  p2.on("pointerdown", () => {
+    gameState.movePiece("p2", step);
+  });
+  p3.on("pointerdown", () => {
+    gameState.movePiece("p3", step);
+  });
+  p4.on("pointerdown", () => {
+    gameState.movePiece("p4", step);
+  });
 }
