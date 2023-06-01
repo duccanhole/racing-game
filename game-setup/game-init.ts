@@ -88,7 +88,7 @@ const mapData: IGrid[] = [
 ];
 const pieceGroup: IPieceGroup = {
   p1: {
-    state: "on-board",
+    state: "out-board",
     startPosition: {
       x: 600,
       y: 25,
@@ -96,7 +96,7 @@ const pieceGroup: IPieceGroup = {
     own: "t1",
   },
   p2: {
-    state: "on-board",
+    state: "out-board",
     startPosition: {
       x: 700,
       y: 25,
@@ -104,7 +104,7 @@ const pieceGroup: IPieceGroup = {
     own: "t1",
   },
   p3: {
-    state: "on-board",
+    state: "out-board",
     startPosition: {
       x: 600,
       y: 150,
@@ -112,7 +112,7 @@ const pieceGroup: IPieceGroup = {
     own: "t2",
   },
   p4: {
-    state: "on-board",
+    state: "out-board",
     startPosition: {
       x: 700,
       y: 150,
@@ -143,7 +143,24 @@ export default function gameInit(scene: any) {
     name: string;
     position: { x: number; y: number };
   }) => {
-    console.log(data);
+    switch (data.name) {
+      case "p1":
+        p1.x = data.position.x;
+        p1.y = data.position.y;
+        break;
+      case "p2":
+        p2.x = data.position.x;
+        p2.y = data.position.y;
+        break;
+      case "3":
+        p3.x = data.position.x;
+        p3.y = data.position.y;
+        break;
+      case "p4":
+        p4.x = data.position.x;
+        p4.y = data.position.y;
+        break;
+    }
   };
   const onSwitchEvt = (turnData: "t1" | "t2") => {
     step = 0;
@@ -162,7 +179,7 @@ export default function gameInit(scene: any) {
   });
   // add event for piece
   p1.on("pointerdown", () => {
-    gameState.movePiece("p1", step);
+    gameState.movePiece("p1", 6);
   });
   p2.on("pointerdown", () => {
     gameState.movePiece("p2", step);

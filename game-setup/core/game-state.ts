@@ -48,11 +48,16 @@ export class GameState {
         check = true;
         break;
       }
-      if (this.pieces[p].state === "on-board") isAllPieceOutBoard = false;
+      if (
+        isAllPieceOutBoard &&
+        this.pieces[p].own === this.moveTurn &&
+        this.pieces[p].state === "on-board"
+      ) {
+        isAllPieceOutBoard = false;
+      }
     }
     // user can not move if roll to value not equal 6, and all pieces out board
-    check = isAllPieceOutBoard && val === 6;
-    if (!check) {
+    if (!check || (val !== 6 && isAllPieceOutBoard)) {
       this.switchTurn();
       return;
     }
@@ -60,13 +65,16 @@ export class GameState {
   }
   // function handle event user click piece
   movePiece(name: string, step: number) {
+    console.log(name, step);
     // check user rolled or not
     if (step === 0) return;
     // check your piece you clicked can move or not
     if (this.checkMovePiece(name, step) === false) return;
     const p = this.pieces[name];
+    console.log(p);
     // if user roll dice to 6, move piece to first grid
     if (p.state === "out-board" && step === 6) {
+      console.log("first move");
       this.updateState(name, "on-board");
       this.updatePosition(name, 0);
       this.onNotifyEvt("move", {
