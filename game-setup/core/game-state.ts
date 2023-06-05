@@ -30,7 +30,7 @@ export class GameState {
     this.moveTurn = firstTurn;
     this.userTurn = userTurn;
   }
-  registerNotifyEvt(notifyEvt: INotifyEvt) {
+  registerListenerEvt(notifyEvt: INotifyEvt) {
     this.notifyEvt = notifyEvt;
   }
   // function handle event user roll dice
@@ -38,15 +38,13 @@ export class GameState {
     // you cant roll current turn is not you turn
     if (this.userTurn !== this.moveTurn) return;
     const val = Math.floor(Math.random() * 6) + 1;
-    // notifyRollEvt(val);
-    console.log("roll:" + val);
+    console.log("roll:" + val + " turn: " + this.userTurn);
     // check all piece of user can move or not; if not, update turn
     let check = false;
     let isAllPieceOutBoard = true;
     for (const p in this.pieces) {
-      if (this.checkMovePiece(p, val)) {
+      if (this.checkMovePiece(p, val) && !check) {
         check = true;
-        break;
       }
       if (
         isAllPieceOutBoard &&
@@ -58,6 +56,7 @@ export class GameState {
     }
     // user can not move if roll to value not equal 6, and all pieces out board
     if (!check || (val !== 6 && isAllPieceOutBoard)) {
+      console.log("you cant move this turn");
       this.switchTurn();
       return;
     }
@@ -65,22 +64,45 @@ export class GameState {
   }
   // function handle event user click piece
   movePiece(name: string, step: number) {
-    console.log(name, step);
     // check user rolled or not
     if (step === 0) return;
     // check your piece you clicked can move or not
-    if (this.checkMovePiece(name, step) === false) return;
+    if (this.checkMovePiece(name, step) === false) {
+      console.log(name + " cant move");
+      this.switchTurn();
+      return;
+    }
     const p = this.pieces[name];
-    console.log(p);
     // if user roll dice to 6, move piece to first grid
     if (p.state === "out-board" && step === 6) {
-      console.log("first move");
+      // but if at first grid has your piece, you cant move that piece which you have choosen
+      const pieceAtFirst = this.mapDataGrid[0].piece ?? "none";
+      if (
+        this.pieces[pieceAtFirst] &&
+        this.pieces[pieceAtFirst].own === this.userTurn
+      )
+        return;
+      // else piece at first is owned by opponent, you can kill it
+      else if (
+        this.pieces[pieceAtFirst] &&
+        this.pieces[pieceAtFirst].own !== this.userTurn
+      ) {
+        console.log(pieceAtFirst + " was killed");
+        this.onNotifyEvt("move", {
+          name: pieceAtFirst,
+          position: this.pieces[pieceAtFirst].startPosition,
+        });
+        this.updatePosition(null, 0);
+        this.updateState(pieceAtFirst, "out-board");
+      }
+      console.log("move " + name + " to " + 0);
       this.updateState(name, "on-board");
       this.updatePosition(name, 0);
       this.onNotifyEvt("move", {
         name,
         position: this.mapDataGrid[0],
       });
+      this.switchTurn();
       return;
     }
     // the current postion of piece
@@ -88,8 +110,12 @@ export class GameState {
     // the destination postion
     const desPostion = this.mapDataGrid[currentIndex + step];
     // if the destination position has opponent piece, kill it by move that piece to start postion
-    if (desPostion.piece) {
+    if (
+      desPostion.piece &&
+      this.pieces[desPostion.piece].own !== this.userTurn
+    ) {
       // move opponent piece to start position
+      console.log(desPostion.piece + " was killed");
       const otherP = this.pieces[desPostion.piece];
       this.onNotifyEvt("move", {
         name: desPostion.piece,

@@ -136,7 +136,6 @@ export default function gameInit(scene: any) {
   //   const p8 = scene.add.circle(700, 225, 10, 0x0000ff).setInteractive();
   // listen event game state emit
   const onRollEvt = (val: number) => {
-    console.log("roll: " + val);
     step = val;
   };
   const onMoveEvt = (data: {
@@ -152,7 +151,7 @@ export default function gameInit(scene: any) {
         p2.x = data.position.x;
         p2.y = data.position.y;
         break;
-      case "3":
+      case "p3":
         p3.x = data.position.x;
         p3.y = data.position.y;
         break;
@@ -167,7 +166,7 @@ export default function gameInit(scene: any) {
     userTurn = turnData;
   };
   const gameState = new GameState(mapData, pieceGroup, userTurn);
-  gameState.registerNotifyEvt({
+  gameState.registerListenerEvt({
     roll: onRollEvt,
     move: onMoveEvt,
     switch: onSwitchEvt,
@@ -179,15 +178,15 @@ export default function gameInit(scene: any) {
   });
   // add event for piece
   p1.on("pointerdown", () => {
-    gameState.movePiece("p1", 6);
+    if (step !== 0) gameState.movePiece("p1", 6);
   });
   p2.on("pointerdown", () => {
-    gameState.movePiece("p2", step);
+    if (step !== 0) gameState.movePiece("p2", step);
   });
   p3.on("pointerdown", () => {
-    gameState.movePiece("p3", step);
+    if (step !== 0) gameState.movePiece("p3", 6);
   });
   p4.on("pointerdown", () => {
-    gameState.movePiece("p4", step);
+    if (step !== 0) gameState.movePiece("p4", step);
   });
 }
