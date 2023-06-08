@@ -178,13 +178,13 @@ export default function gameInit(scene: any) {
   });
   // add event for piece
   p1.on("pointerdown", () => {
-    if (step !== 0) gameState.movePiece("p1", 6);
+    if (step !== 0) gameState.movePiece("p1", step);
   });
   p2.on("pointerdown", () => {
     if (step !== 0) gameState.movePiece("p2", step);
   });
   p3.on("pointerdown", () => {
-    if (step !== 0) gameState.movePiece("p3", 6);
+    if (step !== 0) gameState.movePiece("p3", step);
   });
   p4.on("pointerdown", () => {
     if (step !== 0) gameState.movePiece("p4", step);

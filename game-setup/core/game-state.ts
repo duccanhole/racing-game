@@ -37,7 +37,8 @@ export class GameState {
   rollDice() {
     // you cant roll current turn is not you turn
     if (this.userTurn !== this.moveTurn) return;
-    const val = Math.floor(Math.random() * 6) + 1;
+    // const val = Math.floor(Math.random() * 6) + 1;
+    const val = parseInt(prompt("enter value test") ?? "1");
     console.log("roll:" + val + " turn: " + this.userTurn);
     // check all piece of user can move or not; if not, update turn
     let check = false;
@@ -57,6 +58,7 @@ export class GameState {
     // user can not move if roll to value not equal 6, and all pieces out board
     if (!check || (val !== 6 && isAllPieceOutBoard)) {
       console.log("you cant move this turn");
+      console.log(check, " line 61");
       this.switchTurn();
       return;
     }
@@ -69,7 +71,6 @@ export class GameState {
     // check your piece you clicked can move or not
     if (this.checkMovePiece(name, step) === false) {
       console.log(name + " cant move");
-      this.switchTurn();
       return;
     }
     const p = this.pieces[name];
@@ -107,6 +108,14 @@ export class GameState {
     }
     // the current postion of piece
     const { index: currentIndex } = this.getCurrPosition(name);
+    // check piece can finish or not
+    if (currentIndex + step >= this.mapDataGrid.length - 1) {
+      console.log(name + " has finished");
+      this.updateState(name, "finish");
+      this.updatePosition(null, currentIndex);
+      this.onNotifyEvt("finish", name);
+      return;
+    }
     // the destination postion
     const desPostion = this.mapDataGrid[currentIndex + step];
     // if the destination position has opponent piece, kill it by move that piece to start postion
@@ -130,22 +139,28 @@ export class GameState {
       name,
       position: desPostion,
     });
+    console.log("move " + name + " to " + (currentIndex + step));
     this.updatePosition(name, currentIndex + step);
     // after move piece to destination, remove store piece at current position
+    console.log("clear position of " + name + " at " + currentIndex);
     this.updatePosition(null, currentIndex);
     // and update turn
     this.switchTurn();
   }
   // function check piece can move with number step or not
   checkMovePiece(name: string, step: number): boolean {
+    // ypu cant move piece from outside board to board if you dont roll to 6
+    if (this.pieces[name].state === "out-board") return step === 6;
     // you cant move piece if current turn is not your turn
     if (this.pieces[name].own !== this.moveTurn) return false;
-    // you also cant move piece if the destination position has your piece
+    // you also cannot move the piece if it is behind at least 1 of your pieces with distance <= step
     const { index } = this.getCurrPosition(name);
-    const desPostion = this.mapDataGrid[index + step];
-    if (desPostion.piece) {
-      const ownerPiece = this.getPiece(desPostion.piece).own;
-      if (ownerPiece === this.userTurn) return false;
+    for (let i = index; i <= index + step; i++) {
+      const desPostion = this.mapDataGrid[i];
+      if (desPostion.piece) {
+        const ownerPiece = this.getPiece(desPostion.piece).own;
+        if (ownerPiece === this.userTurn) return false;
+      }
     }
     return true;
   }
@@ -154,8 +169,9 @@ export class GameState {
   }
   updatePosition(name: string | null, index: number) {
     if (name) this.mapDataGrid[index].piece = name;
-    else if (index && this.mapDataGrid[index]?.piece)
-      delete this.mapDataGrid[index].piece;
+    else {
+      if (this.mapDataGrid[index].piece) delete this.mapDataGrid[index].piece;
+    }
   }
   updateState(name: string, state: "on-board" | "out-board" | "finish") {
     this.pieces[name].state = state;
@@ -179,3 +195,4 @@ export class GameState {
     this.userTurn = turn;
   }
 }
+// BUG DETECT: when a piece kill oponenent at first grid; it cant move next turn
