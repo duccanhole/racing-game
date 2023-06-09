@@ -4,3 +4,8 @@
     <va-button class="mx-2" @click="$router.push('/authen')">Login</va-button>
   </div>
 </template>
+<script setup>
+useHead({
+  title: "Home",
+});
+</script>

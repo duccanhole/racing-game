@@ -127,13 +127,9 @@ export default function gameInit(scene: any) {
   // init my piece
   const p1 = scene.add.circle(600, 25, 10, 0xffffff).setInteractive();
   const p2 = scene.add.circle(700, 25, 10, 0xffffff).setInteractive();
-  //   const p3 = scene.add.circle(600, 100, 10, 0xffffff).setInteractive();
-  //   const p4 = scene.add.circle(700, 100, 10, 0xffffff).setInteractive();
   // init opponent piece
   const p3 = scene.add.circle(600, 150, 10, 0x0000ff).setInteractive();
   const p4 = scene.add.circle(700, 150, 10, 0x000ff).setInteractive();
-  //   const p7 = scene.add.circle(600, 225, 10, 0x0000ff).setInteractive();
-  //   const p8 = scene.add.circle(700, 225, 10, 0x0000ff).setInteractive();
   // listen event game state emit
   const onRollEvt = (val: number) => {
     step = val;
@@ -142,6 +138,10 @@ export default function gameInit(scene: any) {
     name: string;
     position: { x: number; y: number };
   }) => {
+    console.log(data, data.position);
+    console.log(
+      "move " + data.name + " to x:" + data.position.x + " y:" + data.position.y
+    );
     switch (data.name) {
       case "p1":
         p1.x = data.position.x;

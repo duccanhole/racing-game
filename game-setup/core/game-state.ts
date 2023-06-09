@@ -13,6 +13,11 @@ export interface IPieceGroup {
 export interface INotifyEvt {
   [name: string]: ((data: any) => void) | Function;
 }
+
+function sleep(time: number) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 export class GameState {
   mapDataGrid: IGrid[];
   pieces: IPieceGroup;
@@ -58,14 +63,13 @@ export class GameState {
     // user can not move if roll to value not equal 6, and all pieces out board
     if (!check || (val !== 6 && isAllPieceOutBoard)) {
       console.log("you cant move this turn");
-      console.log(check, " line 61");
       this.switchTurn();
       return;
     }
     this.onNotifyEvt("roll", val);
   }
   // function handle event user click piece
-  movePiece(name: string, step: number) {
+  async movePiece(name: string, step: number) {
     // check user rolled or not
     if (step === 0) return;
     // check your piece you clicked can move or not
@@ -128,10 +132,12 @@ export class GameState {
       const otherP = this.pieces[desPostion.piece];
       this.onNotifyEvt("move", {
         name: desPostion.piece,
-        postion: otherP.startPosition,
+        position: otherP.startPosition,
       });
       this.updatePosition(null, currentIndex + step);
-      this.updateState(desPostion.piece, "on-board");
+      console.log(desPostion.piece, " line 138");
+      this.updateState(desPostion.piece, "out-board");
+      await sleep(500);
     }
     // move your piece to destination position
     // notifyEvt(name, desPostion);
@@ -141,6 +147,7 @@ export class GameState {
     });
     console.log("move " + name + " to " + (currentIndex + step));
     this.updatePosition(name, currentIndex + step);
+    await sleep(500);
     // after move piece to destination, remove store piece at current position
     console.log("clear position of " + name + " at " + currentIndex);
     this.updatePosition(null, currentIndex);
@@ -153,15 +160,21 @@ export class GameState {
     if (this.pieces[name].state === "out-board") return step === 6;
     // you cant move piece if current turn is not your turn
     if (this.pieces[name].own !== this.moveTurn) return false;
-    // you also cannot move the piece if it is behind at least 1 of your pieces with distance <= step
+    // you also cannot move the piece if it is behind at least 1 piece with distance < step
     const { index } = this.getCurrPosition(name);
-    for (let i = index; i <= index + step; i++) {
+    for (let i = index + 1; i < index + step; i++) {
       const desPostion = this.mapDataGrid[i];
       if (desPostion.piece) {
-        const ownerPiece = this.getPiece(desPostion.piece).own;
-        if (ownerPiece === this.userTurn) return false;
+        console.log(desPostion);
+        return false;
       }
     }
+    // if at destination position have your piece, you cant move (because your team can't kill each other)
+    if (
+      this.getPiece(this.mapDataGrid[index + step].piece || "")?.own ===
+      this.userTurn
+    )
+      return false;
     return true;
   }
   getPiece(name: string) {
@@ -195,4 +208,4 @@ export class GameState {
     this.userTurn = turn;
   }
 }
-// BUG DETECT: when a piece kill oponenent at first grid; it cant move next turn
+// BUG DETECT: when a piece kill oponenent at first grid; it cant move next turn -> FIXED
