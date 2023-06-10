@@ -3,5 +3,5 @@
 ## Status
 - Done
 ## Description
-- I have inited repository and write document
+- I have created repository and write document
 - I will continue update status in futures

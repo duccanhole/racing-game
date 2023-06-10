@@ -42,8 +42,8 @@ export class GameState {
   rollDice() {
     // you cant roll current turn is not you turn
     if (this.userTurn !== this.moveTurn) return;
-    // const val = Math.floor(Math.random() * 6) + 1;
-    const val = parseInt(prompt("enter value test") ?? "1");
+    const val = Math.floor(Math.random() * 6) + 1;
+    // const val = parseInt(prompt("enter value test") ?? "1");
     console.log("roll:" + val + " turn: " + this.userTurn);
     // check all piece of user can move or not; if not, update turn
     let check = false;
@@ -127,16 +127,16 @@ export class GameState {
       desPostion.piece &&
       this.pieces[desPostion.piece].own !== this.userTurn
     ) {
+      const opponentPiece = desPostion.piece;
       // move opponent piece to start position
-      console.log(desPostion.piece + " was killed");
-      const otherP = this.pieces[desPostion.piece];
+      console.log(opponentPiece + " was killed");
+      const otherP = this.pieces[opponentPiece];
       this.onNotifyEvt("move", {
         name: desPostion.piece,
         position: otherP.startPosition,
       });
       this.updatePosition(null, currentIndex + step);
-      console.log(desPostion.piece, " line 138");
-      this.updateState(desPostion.piece, "out-board");
+      this.updateState(opponentPiece, "out-board");
       await sleep(500);
     }
     // move your piece to destination position
@@ -156,26 +156,28 @@ export class GameState {
   }
   // function check piece can move with number step or not
   checkMovePiece(name: string, step: number): boolean {
-    // ypu cant move piece from outside board to board if you dont roll to 6
-    if (this.pieces[name].state === "out-board") return step === 6;
     // you cant move piece if current turn is not your turn
     if (this.pieces[name].own !== this.moveTurn) return false;
+    // you cant move piece from outside board to board if you dont roll to 6
+    if (this.pieces[name].state === "out-board") return step === 6;
     // you also cannot move the piece if it is behind at least 1 piece with distance < step
     const { index } = this.getCurrPosition(name);
-    for (let i = index + 1; i < index + step; i++) {
+    // we only check grid in board, if piece move step > map length, we need skip it.
+    let maxPostion = Math.min(this.mapDataGrid.length, index + step);
+    for (let i = index + 1; i < maxPostion; i++) {
       const desPostion = this.mapDataGrid[i];
       if (desPostion.piece) {
         console.log(desPostion);
         return false;
       }
     }
+    // if exist a piece that can finish, we dont need to check it anymore
+    if (index + step >= this.mapDataGrid.length) return true;
     // if at destination position have your piece, you cant move (because your team can't kill each other)
-    if (
+    return !(
       this.getPiece(this.mapDataGrid[index + step].piece || "")?.own ===
       this.userTurn
-    )
-      return false;
-    return true;
+    );
   }
   getPiece(name: string) {
     return this.pieces[name];
@@ -199,6 +201,7 @@ export class GameState {
     //this is for testing, need remove in release
     this.setTurn(this.moveTurn);
   }
+  // function to notify event to listener event
   onNotifyEvt(eventName: string, data: any = null) {
     if (this.notifyEvt[eventName]) {
       this.notifyEvt[eventName](data);
@@ -208,4 +211,3 @@ export class GameState {
     this.userTurn = turn;
   }
 }
-// BUG DETECT: when a piece kill oponenent at first grid; it cant move next turn -> FIXED

@@ -138,7 +138,6 @@ export default function gameInit(scene: any) {
     name: string;
     position: { x: number; y: number };
   }) => {
-    console.log(data, data.position);
     console.log(
       "move " + data.name + " to x:" + data.position.x + " y:" + data.position.y
     );
@@ -165,11 +164,15 @@ export default function gameInit(scene: any) {
     step = 0;
     userTurn = turnData;
   };
+  const onFinish = (piece: string) => {
+    console.log(piece + " has finished.");
+  };
   const gameState = new GameState(mapData, pieceGroup, userTurn);
   gameState.registerListenerEvt({
     roll: onRollEvt,
     move: onMoveEvt,
     switch: onSwitchEvt,
+    finish: onFinish,
   });
   // create dice
   const dice = scene.add.circle(750, 300, 10, 0xffff00).setInteractive();
@@ -190,3 +193,4 @@ export default function gameInit(scene: any) {
     if (step !== 0) gameState.movePiece("p4", step);
   });
 }
+// to do: implement case piece finish, check and notify the winner

@@ -5,6 +5,6 @@
 ## Description
 - List of technology I intent to use:
     - Game framwork: Phaserjs
-    - Client side: nuxtjs 3
-    - Server side: Nestjs, socket.io
+    - Client side: Nuxtjs 3
+    - Server side: Nestjs, Socket.io
     - Database: mongodb
