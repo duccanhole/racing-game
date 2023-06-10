@@ -4,7 +4,7 @@ In conceptualizing and planning, I planned to divide this project into 8 phases.
 - <b><u>Phase 3</u></b>: setup project, implement technology [link](./phase3.md)
 - <b><u>Phase 4</u></b>: develop the base basic game (core logic) [link](./phase4.md)
 - <b><u>Phase 5</u></b>: set up realtime server (for multiplayer)
-- <b><u>Phase 6</u></b>: develop game advance (UI and animation)
+- <b><u>Phase 6</u></b>: develop game advance (UI and animation), special skill of each piece 
 - <b><u>Phase 7</u></b>: set up database
 - <b><u>Phase 9</u></b>: review and finalize the necessary features
 - <b><u>Phase 10</u></b>: publish game
