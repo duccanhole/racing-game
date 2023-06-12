@@ -7,6 +7,7 @@ export interface IPieceGroup {
   [name: string]: {
     state: "on-board" | "out-board" | "finish";
     startPosition: IGrid;
+    finishPosition: IGrid;
     own: "t1" | "t2";
   };
 }
@@ -23,6 +24,9 @@ export class GameState {
   pieces: IPieceGroup;
   moveTurn: "t1" | "t2";
   userTurn: "t1" | "t2";
+  t1Score: number = 0;
+  t2Score: number = 0;
+  scoreRank = 85;
   notifyEvt: INotifyEvt = {};
   constructor(
     mapDataGrid: IGrid[],
@@ -114,10 +118,7 @@ export class GameState {
     const { index: currentIndex } = this.getCurrPosition(name);
     // check piece can finish or not
     if (currentIndex + step >= this.mapDataGrid.length - 1) {
-      console.log(name + " has finished");
-      this.updateState(name, "finish");
-      this.updatePosition(null, currentIndex);
-      this.onNotifyEvt("finish", name);
+      this.onPieceFinish(name, currentIndex);
       return;
     }
     // the destination postion
@@ -154,10 +155,49 @@ export class GameState {
     // and update turn
     this.switchTurn();
   }
+  // function handle event piece finish
+  async onPieceFinish(name: string, currentIndex: number) {
+    this.updateState(name, "finish");
+    this.updatePosition(null, currentIndex);
+    await sleep(500);
+    this.onNotifyEvt("pieceFinish", {
+      name,
+      position: this.pieces[name].finishPosition,
+    });
+    // add score to player base on rank of piece
+    if (this.pieces[name].own === "t1") this.t1Score += this.scoreRank;
+    else this.t2Score += this.scoreRank;
+    this.scoreRank -= 10;
+    // we also need to check the winner
+    // the game ends when all the pieces of one of the two teams reach the finish point
+    let isT1Finish = true,
+      isT2Finish = true;
+    for (const key in this.pieces) {
+      const piece = this.pieces[key];
+      if (piece.own === "t1" && piece.state === "finish" && isT1Finish)
+        isT1Finish = false;
+      if (piece.own === "t2" && piece.state === "finish" && isT2Finish)
+        isT2Finish = false;
+    }
+    if (isT1Finish || isT2Finish) {
+      let winner = "none";
+      if (this.t1Score > this.t2Score) winner = "t1";
+      else if (this.t1Score < this.t2Score) winner = "t2";
+      this.onNotifyEvt("gameEnd", {
+        winner,
+        score: Math.max(this.t1Score, this.t2Score),
+      });
+    }
+  }
   // function check piece can move with number step or not
   checkMovePiece(name: string, step: number): boolean {
     // you cant move piece if current turn is not your turn
-    if (this.pieces[name].own !== this.moveTurn) return false;
+    // or that piece has finished
+    if (
+      this.pieces[name].own !== this.moveTurn ||
+      this.pieces[name].state === "finish"
+    )
+      return false;
     // you cant move piece from outside board to board if you dont roll to 6
     if (this.pieces[name].state === "out-board") return step === 6;
     // you also cannot move the piece if it is behind at least 1 piece with distance < step
@@ -166,10 +206,7 @@ export class GameState {
     let maxPostion = Math.min(this.mapDataGrid.length, index + step);
     for (let i = index + 1; i < maxPostion; i++) {
       const desPostion = this.mapDataGrid[i];
-      if (desPostion.piece) {
-        console.log(desPostion);
-        return false;
-      }
+      if (desPostion.piece) return false;
     }
     // if exist a piece that can finish, we dont need to check it anymore
     if (index + step >= this.mapDataGrid.length) return true;
@@ -211,3 +248,5 @@ export class GameState {
     this.userTurn = turn;
   }
 }
+// BUG detect: game state not switch turn in case piece cant move to first grid,
+// and piece at first grid also cant move

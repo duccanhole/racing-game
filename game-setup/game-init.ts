@@ -93,11 +93,19 @@ const pieceGroup: IPieceGroup = {
       x: 600,
       y: 25,
     },
+    finishPosition: {
+      x: 600,
+      y: 25,
+    },
     own: "t1",
   },
   p2: {
     state: "out-board",
     startPosition: {
+      x: 700,
+      y: 25,
+    },
+    finishPosition: {
       x: 700,
       y: 25,
     },
@@ -109,11 +117,19 @@ const pieceGroup: IPieceGroup = {
       x: 600,
       y: 150,
     },
+    finishPosition: {
+      x: 600,
+      y: 150,
+    },
     own: "t2",
   },
   p4: {
     state: "out-board",
     startPosition: {
+      x: 700,
+      y: 150,
+    },
+    finishPosition: {
       x: 700,
       y: 150,
     },
@@ -164,15 +180,43 @@ export default function gameInit(scene: any) {
     step = 0;
     userTurn = turnData;
   };
-  const onFinish = (piece: string) => {
-    console.log(piece + " has finished.");
+  const onPieceFinish = (data: {
+    name: string;
+    position: { x: number; y: number };
+  }) => {
+    console.log(data.name + " has finished.");
+    switch (data.name) {
+      case "p1":
+        p1.x = data.position.x;
+        p1.y = data.position.y;
+        break;
+      case "p2":
+        p2.x = data.position.x;
+        p2.y = data.position.y;
+        break;
+      case "p3":
+        p3.x = data.position.x;
+        p3.y = data.position.y;
+        break;
+      case "p4":
+        p4.x = data.position.x;
+        p4.y = data.position.y;
+        break;
+    }
+  };
+  const onGameFinish = (data: { winner: string; score: number }) => {
+    if (data.winner === "none") console.log("game draw");
+    else {
+      console.log(data.winner + " has win with " + data.score);
+    }
   };
   const gameState = new GameState(mapData, pieceGroup, userTurn);
   gameState.registerListenerEvt({
     roll: onRollEvt,
     move: onMoveEvt,
     switch: onSwitchEvt,
-    finish: onFinish,
+    pieceFinish: onPieceFinish,
+    gameFinish: onGameFinish,
   });
   // create dice
   const dice = scene.add.circle(750, 300, 10, 0xffff00).setInteractive();
