@@ -46,8 +46,8 @@ export class GameState {
   rollDice() {
     // you cant roll current turn is not you turn
     if (this.userTurn !== this.moveTurn) return;
-    const val = Math.floor(Math.random() * 6) + 1;
-    // const val = parseInt(prompt("enter value test") ?? "1");
+    // const val = Math.floor(Math.random() * 6) + 1;
+    const val = parseInt(prompt("enter value test") ?? "1");
     console.log("roll:" + val + " turn: " + this.userTurn);
     // check all piece of user can move or not; if not, update turn
     let check = false;
@@ -84,15 +84,9 @@ export class GameState {
     const p = this.pieces[name];
     // if user roll dice to 6, move piece to first grid
     if (p.state === "out-board" && step === 6) {
-      // but if at first grid has your piece, you cant move that piece which you have choosen
       const pieceAtFirst = this.mapDataGrid[0].piece ?? "none";
+      // if piece at first is owned by opponent, you can kill it
       if (
-        this.pieces[pieceAtFirst] &&
-        this.pieces[pieceAtFirst].own === this.userTurn
-      )
-        return;
-      // else piece at first is owned by opponent, you can kill it
-      else if (
         this.pieces[pieceAtFirst] &&
         this.pieces[pieceAtFirst].own !== this.userTurn
       ) {
@@ -198,8 +192,17 @@ export class GameState {
       this.pieces[name].state === "finish"
     )
       return false;
-    // you cant move piece from outside board to board if you dont roll to 6
-    if (this.pieces[name].state === "out-board") return step === 6;
+    // we need check piece can move to board or not
+    if (this.pieces[name].state === "out-board") {
+      // you cant move piece from outside board to board if you dont roll to 6
+      if (step !== 6) return false;
+      // you also cant move if at first grid has your piece
+      const pieceAtFirst = this.mapDataGrid[0]?.piece;
+      if (pieceAtFirst) {
+        return this.pieces[pieceAtFirst].own !== this.userTurn;
+      }
+      return true;
+    }
     // you also cannot move the piece if it is behind at least 1 piece with distance < step
     const { index } = this.getCurrPosition(name);
     // we only check grid in board, if piece move step > map length, we need skip it.
@@ -248,5 +251,3 @@ export class GameState {
     this.userTurn = turn;
   }
 }
-// BUG detect: game state not switch turn in case piece cant move to first grid,
-// and piece at first grid also cant move
