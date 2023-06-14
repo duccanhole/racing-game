@@ -46,8 +46,8 @@ export class GameState {
   rollDice() {
     // you cant roll current turn is not you turn
     if (this.userTurn !== this.moveTurn) return;
-    // const val = Math.floor(Math.random() * 6) + 1;
-    const val = parseInt(prompt("enter value test") ?? "1");
+    const val = Math.floor(Math.random() * 6) + 1;
+    // const val = parseInt(prompt("enter value test") ?? "1");
     console.log("roll:" + val + " turn: " + this.userTurn);
     // check all piece of user can move or not; if not, update turn
     let check = false;
@@ -168,19 +168,22 @@ export class GameState {
       isT2Finish = true;
     for (const key in this.pieces) {
       const piece = this.pieces[key];
-      if (piece.own === "t1" && piece.state === "finish" && isT1Finish)
+      if (piece.own === "t1" && piece.state !== "finish" && isT1Finish)
         isT1Finish = false;
-      if (piece.own === "t2" && piece.state === "finish" && isT2Finish)
+      if (piece.own === "t2" && piece.state !== "finish" && isT2Finish)
         isT2Finish = false;
     }
     if (isT1Finish || isT2Finish) {
       let winner = "none";
       if (this.t1Score > this.t2Score) winner = "t1";
       else if (this.t1Score < this.t2Score) winner = "t2";
-      this.onNotifyEvt("gameEnd", {
+      this.onNotifyEvt("gameFinish", {
         winner,
         score: Math.max(this.t1Score, this.t2Score),
       });
+    } else {
+      console.log("switch turn after piece finish");
+      this.switchTurn();
     }
   }
   // function check piece can move with number step or not
