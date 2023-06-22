@@ -1,5 +1,8 @@
+import Phaser from "phaser";
+
 import gameInit from "./game-init";
 import initMovement from "./movement";
+import { Dice } from "./game-object/dice";
 
 const mapWidth = 300,
   mapHeight = 300;
@@ -26,4 +29,16 @@ function update() {
   const scene: any = this;
 }
 
-export default { create, preload, update };
+class GameScene extends Phaser.Scene {
+  dice: Dice | undefined;
+  preload() {
+    this.dice = new Dice(this);
+    this.dice.loadObject();
+  }
+  create() {
+    this.dice?.createObject();
+  }
+  update() {}
+}
+
+export { create, preload, update, GameScene };
