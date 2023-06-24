@@ -1,21 +1,25 @@
 import Phaser from "phaser";
 // @ts-ignore
 import DiceSpriteSheet from "../../assets/game-object/dice.png";
+import gameConfig from "../game-config";
 export class Dice {
   context: Phaser.Scene;
-  obj: any;
+  dice: any;
   rollEnded: boolean = true;
   constructor(context: Phaser.Scene) {
     this.context = context;
   }
-  loadObject() {
+  load() {
     this.context.load.spritesheet("dice", DiceSpriteSheet, {
       frameWidth: 100,
       frameHeight: 100,
     });
   }
   createObject() {
-    this.obj = this.context.add.sprite(250, 250, "dice").setInteractive();
+    this.dice = this.context.add
+      .sprite(gameConfig.width / 2, 25, "dice")
+      .setScale(0.5)
+      .setInteractive();
     this.context.anims.create({
       key: "roll",
       frames: this.context.anims.generateFrameNumbers("dice", {
@@ -31,16 +35,16 @@ export class Dice {
         frameRate: 10,
       });
     }
-    this.obj.on("pointerdown", () => {
+    this.dice.on("pointerdown", () => {
       if (this.rollEnded) {
-        this.obj.play("roll", true);
+        this.dice.play("roll", true);
         this.rollEnded = false;
       }
     });
-    this.obj.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+    this.dice.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
       if (!this.rollEnded) {
         const val = Math.floor(Math.random() * 6) + 1;
-        this.obj.play("roll-" + val);
+        this.dice.play("roll-" + val);
         this.rollEnded = true;
       }
     });

@@ -7,25 +7,19 @@
   </div>
 </template>
 <script lang="ts" setup>
-import GameScene from "../game-setup/game-scene";
+import { GameScene } from "../game-setup/game-scene";
+import gameConfig from "../game-setup/game-config";
 const gamePlay: Ref<HTMLDivElement | undefined> = ref();
 useHead({
   title: "Game Play",
 });
 onMounted(() => {
-  const gameConfig = {
+  const config = {
     parent: gamePlay.value,
-    type: Phaser.AUTO,
-    scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
-      expandParent: true,
-    },
-    width: 800,
-    height: 400,
     scene: GameScene,
+    ...gameConfig,
   };
-  new Phaser.Game(gameConfig);
+  new Phaser.Game(config);
 });
 </script>
 <style scoped>
