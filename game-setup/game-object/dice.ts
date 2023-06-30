@@ -1,10 +1,9 @@
 import Phaser from "phaser";
 // @ts-ignore
 import DiceSpriteSheet from "../../assets/game-object/dice.png";
-import gameConfig from "../game-config";
 export class Dice {
   context: Phaser.Scene;
-  dice: any;
+  dice: Phaser.GameObjects.Sprite | undefined;
   rollEnded: boolean = true;
   constructor(context: Phaser.Scene) {
     this.context = context;
@@ -15,12 +14,12 @@ export class Dice {
       frameHeight: 100,
     });
   }
-  createObject() {
+  create() {
     this.dice = this.context.add
-      .sprite(gameConfig.width / 2, 25, "dice")
+      .sprite(Number(this.context.game.config.width) / 2, 25, "dice")
       .setScale(0.5)
       .setInteractive();
-    this.context.anims.create({
+    this.dice.anims.create({
       key: "roll",
       frames: this.context.anims.generateFrameNumbers("dice", {
         start: 1,
@@ -28,25 +27,29 @@ export class Dice {
       }),
       frameRate: 5,
     });
-    for (let i = 1; i <= 6; i++) {
-      this.context.anims.create({
+    for (let i = 0; i <= 6; i++) {
+      this.dice.anims.create({
         key: "roll-" + i,
         frames: [{ key: "dice", frame: i }],
         frameRate: 10,
       });
     }
-    this.dice.on("pointerdown", () => {
-      if (this.rollEnded) {
-        this.dice.play("roll", true);
-        this.rollEnded = false;
-      }
-    });
-    this.dice.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-      if (!this.rollEnded) {
-        const val = Math.floor(Math.random() * 6) + 1;
-        this.dice.play("roll-" + val);
-        this.rollEnded = true;
-      }
-    });
+    // this.dice.on("pointerdown", () => {
+    //   if (this.rollEnded) {
+    //     this.dice?.play("roll", true);
+    //     this.rollEnded = false;
+    //   }
+    // });
+    // this.dice.on(Phaser.Animations.Events.ANIMATION_COMPLETE, (animation: Phaser.Animations.Animation) => {
+    //   console.log(animation.key);
+    //   if (!this.rollEnded) {
+    //     const val = Math.floor(Math.random() * 6) + 1;
+    //     this.dice?.play("roll-" + val);
+    //     this.rollEnded = true;
+    //   }
+    // });
+  }
+  getSprite() {
+    return this.dice;
   }
 }

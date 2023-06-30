@@ -1,4 +1,4 @@
-const gameConfig = {
+const GAME_CONFIG = {
   type: Phaser.AUTO,
   scale: {
     mode: Phaser.Scale.FIT,
@@ -9,4 +9,4 @@ const gameConfig = {
   height: 400,
 };
 
-export default gameConfig;
+export default GAME_CONFIG;

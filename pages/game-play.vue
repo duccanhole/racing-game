@@ -7,7 +7,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { GameScene } from "../game-setup/game-scene";
+import GameScene from "../game-setup/game-scene";
 import gameConfig from "../game-setup/game-config";
 const gamePlay: Ref<HTMLDivElement | undefined> = ref();
 useHead({

@@ -20,4 +20,3 @@
 - Today, I learned something about pixel animation:
     - You should split your object to multiple layer
     - You should draw a frame before draw detail
-
