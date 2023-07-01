@@ -2,7 +2,7 @@
 
 ## Time estimate
 
-- ~ 2 month
+- ~ 2 month (20/6 - 30/6)
 
 ## Status
 
@@ -18,5 +18,5 @@
 - Create piece
 - Add sound effect !? (if I have enough time :D)
 - Today, I learned something about pixel animation:
-    - You should split your object to multiple layer
-    - You should draw a frame before draw detail
+  - You should split your object to multiple layer
+  - You should draw a frame before draw detail

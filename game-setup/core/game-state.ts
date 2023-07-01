@@ -42,36 +42,24 @@ export class GameState {
   registerListenerEvt(notifyEvt: INotifyEvt) {
     this.notifyEvt = notifyEvt;
   }
+  /**
+   * this function will generate a random number (from 1 - 6) and emit value
+   * @returns notify function
+   */
   // function handle event user roll dice
   rollDice() {
     // you cant roll current turn is not you turn
     if (this.userTurn !== this.moveTurn) return;
     const val = Math.floor(Math.random() * 6) + 1;
     // const val = parseInt(prompt("enter value test") ?? "1");
-    console.log("roll:" + val + " turn: " + this.userTurn);
-    // check all piece of user can move or not; if not, update turn
-    let check = false;
-    let isAllPieceOutBoard = true;
-    for (const p in this.pieces) {
-      if (this.checkMovePiece(p, val) && !check) {
-        check = true;
-      }
-      if (
-        isAllPieceOutBoard &&
-        this.pieces[p].own === this.moveTurn &&
-        this.pieces[p].state === "on-board"
-      ) {
-        isAllPieceOutBoard = false;
-      }
-    }
-    // user can not move if roll to value not equal 6, and all pieces out board
-    if (!check || (val !== 6 && isAllPieceOutBoard)) {
-      console.log("you cant move this turn");
-      this.switchTurn();
-      return;
-    }
     this.onNotifyEvt("roll", val);
   }
+  /**
+   * use this function to handle event user click piece
+   * @param name Piece name
+   * @param step Number to move
+   * @returns
+   */
   // function handle event user click piece
   async movePiece(name: string, step: number) {
     // check user rolled or not
@@ -185,6 +173,35 @@ export class GameState {
       console.log("switch turn after piece finish");
       this.switchTurn();
     }
+  }
+  /**
+   * this function will loop over all piece of current team to check current team can move or not
+   * @param val the value return of dice
+   * @returns boolean
+   */
+  // check all piece of your team can move or not
+  checkMoveTeam(val: number) {
+    let check = false;
+    let isAllPieceOutBoard = true;
+    for (const p in this.pieces) {
+      if (this.checkMovePiece(p, val) && !check) {
+        check = true;
+      }
+      if (
+        isAllPieceOutBoard &&
+        this.pieces[p].own === this.moveTurn &&
+        this.pieces[p].state === "on-board"
+      ) {
+        isAllPieceOutBoard = false;
+      }
+    }
+    // user can not move if roll to value not equal 6, and all pieces out board
+    if (!check || (val !== 6 && isAllPieceOutBoard)) {
+      console.log("you cant move this turn");
+      // this.switchTurn();
+      return false;
+    }
+    return true;
   }
   // function check piece can move with number step or not
   checkMovePiece(name: string, step: number): boolean {

@@ -19,6 +19,9 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.dice?.create();
     this.map?.createMap();
+    const text = this.add
+      .text(this.cameras.main.centerX - 30, 75, "Turn: " + this.userTurn)
+      .setInteractive();
     // create piece
     const p1 = this.add.circle(100, 25, 10, 0xffffff).setInteractive();
     PIECE_GROUP_DATA.p1 = {
@@ -78,7 +81,6 @@ export default class GameScene extends Phaser.Scene {
     };
     // listen event game state emit
     const onRollEvt = (val: number) => {
-      console.log(val, " line 133");
       this.step = val;
     };
     const onMoveEvt = (data: {
@@ -116,6 +118,7 @@ export default class GameScene extends Phaser.Scene {
       this.step = 0;
       this.userTurn = turnData;
       this.dice?.getSprite()?.play("roll-0");
+      text.setText("Turn: " + this.userTurn);
     };
     const onPieceFinish = (data: {
       name: string;
@@ -172,6 +175,14 @@ export default class GameScene extends Phaser.Scene {
         (animation: Phaser.Animations.Animation) => {
           if (animation.key === "roll" && this.step !== 0) {
             this.dice?.getSprite()?.play("roll-" + this.step);
+            if (gameState.checkMoveTeam(this.step)) {
+              text.setText(this.userTurn + " move");
+            } else {
+              text.setText(this.userTurn + " can't move");
+              setTimeout(() => {
+                gameState.switchTurn();
+              }, 2000);
+            }
           }
         }
       );
