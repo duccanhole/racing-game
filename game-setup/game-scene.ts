@@ -32,7 +32,7 @@ export default class GameScene extends Phaser.Scene {
       },
       finishPosition: {
         x: 100,
-        y: 200,
+        y: 25,
       },
       own: "t1",
     };
@@ -45,7 +45,7 @@ export default class GameScene extends Phaser.Scene {
       },
       finishPosition: {
         x: 200,
-        y: 200,
+        y: 25,
       },
       own: "t1",
     };
@@ -124,7 +124,6 @@ export default class GameScene extends Phaser.Scene {
       name: string;
       position: { x: number; y: number };
     }) => {
-      console.log(data.name + " has finished.");
       switch (data.name) {
         case "p1":
           p1.x = data.position.x;
@@ -145,9 +144,9 @@ export default class GameScene extends Phaser.Scene {
       }
     };
     const onGameFinish = (data: { winner: string; score: number }) => {
-      if (data.winner === "none") console.log("game draw");
+      if (data.winner === "none") text.setText("Game draw");
       else {
-        console.log(data.winner + " has win with " + data.score);
+        text.setText(data.winner + " has won with score: " + data.score);
       }
     };
     const gameState = new GameState(
