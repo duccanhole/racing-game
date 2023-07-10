@@ -8,7 +8,7 @@
 </template>
 <script lang="ts" setup>
 import GameScene from "../game-setup/game-scene";
-import gameConfig from "../game-setup/game-config";
+import { GAME_CONFIG } from "../game-setup/game-variable";
 const gamePlay: Ref<HTMLDivElement | undefined> = ref();
 useHead({
   title: "Game Play",
@@ -17,7 +17,7 @@ onMounted(() => {
   const config = {
     parent: gamePlay.value,
     scene: GameScene,
-    ...gameConfig,
+    ...GAME_CONFIG,
   };
   new Phaser.Game(config);
 });

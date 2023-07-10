@@ -1,12 +1,13 @@
+
 import Phaser from "phaser";
+import { GameObject } from ".";
 // @ts-ignore
 import DiceSpriteSheet from "../../assets/game-object/dice.png";
-export class Dice {
-  context: Phaser.Scene;
-  dice: Phaser.GameObjects.Sprite | undefined;
+
+export class Dice extends GameObject {
   rollEnded: boolean = true;
-  constructor(context: Phaser.Scene) {
-    this.context = context;
+  constructor(ctx: Phaser.Scene) {
+    super(ctx);
   }
   load() {
     this.context.load.spritesheet("dice", DiceSpriteSheet, {
@@ -14,12 +15,12 @@ export class Dice {
       frameHeight: 100,
     });
   }
-  create() {
-    this.dice = this.context.add
-      .sprite(Number(this.context.game.config.width) / 2, 25, "dice")
+  create(x: number = 100, y: number = 100) {
+    this.sprite = this.context.add
+      .sprite(x, y, "dice")
       .setScale(0.5)
       .setInteractive();
-    this.dice.anims.create({
+    this.sprite.anims.create({
       key: "roll",
       frames: this.context.anims.generateFrameNumbers("dice", {
         start: 1,
@@ -28,7 +29,7 @@ export class Dice {
       frameRate: 5,
     });
     for (let i = 0; i <= 6; i++) {
-      this.dice.anims.create({
+      this.sprite.anims.create({
         key: "roll-" + i,
         frames: [{ key: "dice", frame: i }],
         frameRate: 10,
@@ -48,8 +49,5 @@ export class Dice {
     //     this.rollEnded = true;
     //   }
     // });
-  }
-  getSprite() {
-    return this.dice;
   }
 }

@@ -1,3 +1,4 @@
+import { GameObject } from ".";
 // @ts-ignore
 import blueDino from "../../assets/game-object/dino/blue.png";
 // @ts-ignore
@@ -7,12 +8,17 @@ import redDino from "../../assets/game-object/dino/red.png";
 // @ts-ignore
 import yellowDino from "../../assets/game-object/dino/yellow.png";
 
-export class Dino {
-  private dino: Phaser.GameObjects.Sprite | undefined;
-  private context: Phaser.Scene;
+import {
+  ANIMS_KEY_ATTACK,
+  ANIMS_KEY_HURT,
+  ANIMS_KEY_IDLE,
+  ANIMS_KEY_MOVE,
+} from "../game-variable";
+
+export class Dino extends GameObject {
   private color: "red" | "blue" | "green" | "yellow";
   constructor(ctx: Phaser.Scene, color: "red" | "blue" | "green" | "yellow") {
-    this.context = ctx;
+    super(ctx);
     this.color = color;
   }
   load() {
@@ -37,10 +43,13 @@ export class Dino {
         frameHeight: 24,
       });
   }
-  create() {
-    this.dino = this.context.add.sprite(100, 100, "dino").setScale(2);
-    this.dino.anims.create({
-      key: "idle",
+  create(x: number = 100, y: number = 100) {
+    this.sprite = this.context.add
+      .sprite(x, y, "dino")
+      .setScale(2)
+      .setInteractive();
+    this.sprite.anims.create({
+      key: ANIMS_KEY_IDLE,
       frames: this.context.anims.generateFrameNumbers("dino", {
         start: 1,
         end: 3,
@@ -48,17 +57,33 @@ export class Dino {
       frameRate: 5,
       repeat: -1,
     });
-    this.dino.anims.create({
-      key: "move",
+    this.sprite.anims.create({
+      key: ANIMS_KEY_MOVE,
       frames: this.context.anims.generateFrameNumbers("dino", {
         start: 5,
         end: 10,
       }),
       frameRate: 10,
     });
-    this.dino.play("idle");
-  }
-  getSpriteSheet() {
-    return this.dino;
+    this.sprite.anims.create({
+      key: ANIMS_KEY_ATTACK,
+      frames: this.context.anims.generateFrameNumbers("dino", {
+        start: 10,
+        end: 13,
+      }),
+      frameRate: 10,
+    });
+    this.sprite.anims.create({
+      key: ANIMS_KEY_HURT,
+      frames: this.context.anims.generateFrameNumbers("dino", {
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+    });
+    this.sprite.play(ANIMS_KEY_IDLE);
+    this.sprite.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      this.sprite!.play("idle");
+    });
   }
 }
