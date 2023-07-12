@@ -1,11 +1,15 @@
 export class GameObject {
-  context: Phaser.Scene;
-  sprite: Phaser.GameObjects.Sprite | undefined;
+  protected context: Phaser.Scene;
+  protected sprite: Phaser.GameObjects.Sprite | undefined;
   constructor(ctx: Phaser.Scene) {
     this.context = ctx;
   }
-  load(): void {}
-  create(): void {}
+  load(...args: any) {
+    throw new Error("Method not implemented.");
+  }
+  create(...args: any) {
+    throw new Error("Method not implemented.");
+  }
   getSprite(): Phaser.GameObjects.Sprite | undefined {
     return this.sprite;
   }

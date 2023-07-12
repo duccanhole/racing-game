@@ -3,9 +3,20 @@ export interface IGrid {
   y: number;
   piece?: string | null;
 }
+
+export type IState = "on-board" | "out-board" | "finish";
+
+export type ITurn = "t1" | "t2";
+
+export enum STATE {
+  out_board = "out-board",
+  on_board = "on-board",
+  finish = "finish",
+}
+
 export interface IPieceGroup {
   [name: string]: {
-    state: "on-board" | "out-board" | "finish";
+    state: IState;
     startPosition: IGrid;
     finishPosition: IGrid;
     own: "t1" | "t2";
@@ -20,10 +31,10 @@ function sleep(time: number) {
 }
 
 export class GameState {
-  mapDataGrid: IGrid[];
+  private mapDataGrid: IGrid[];
   pieces: IPieceGroup;
-  moveTurn: "t1" | "t2";
-  userTurn: "t1" | "t2";
+  moveTurn: ITurn;
+  userTurn: ITurn;
   t1Score: number = 0;
   t2Score: number = 0;
   scoreRank = 85;
@@ -50,8 +61,8 @@ export class GameState {
   rollDice() {
     // you cant roll current turn is not you turn
     if (this.userTurn !== this.moveTurn) return;
-    const val = Math.floor(Math.random() * 6) + 1;
-    // const val = parseInt(prompt("enter value test") ?? "1");
+    // const val = Math.floor(Math.random() * 6) + 1;
+    const val = parseInt(prompt("enter value test") ?? "1");
     this.onNotifyEvt("roll", val);
   }
   /**
@@ -71,7 +82,7 @@ export class GameState {
     }
     const p = this.pieces[name];
     // if user roll dice to 6, move piece to first grid
-    if (p.state === "out-board" && step === 6) {
+    if (p.state === STATE.out_board && step === 6) {
       const pieceAtFirst = this.mapDataGrid[0].piece ?? "none";
       // if piece at first is owned by opponent, you can kill it
       if (
@@ -79,19 +90,17 @@ export class GameState {
         this.pieces[pieceAtFirst].own !== this.userTurn
       ) {
         console.log(pieceAtFirst + " was killed");
-        this.onNotifyEvt("move", {
-          name: pieceAtFirst,
-          position: this.pieces[pieceAtFirst].startPosition,
-        });
+        this.onNotifyEvt("kill", pieceAtFirst);
         this.updatePosition(null, 0);
-        this.updateState(pieceAtFirst, "out-board");
+        this.updateState(pieceAtFirst, STATE.out_board);
       }
       console.log("move " + name + " to " + 0);
-      this.updateState(name, "on-board");
+      this.updateState(name, STATE.on_board);
       this.updatePosition(name, 0);
       this.onNotifyEvt("move", {
         name,
-        position: this.mapDataGrid[0],
+        from: -1,
+        to: 0,
       });
       this.switchTurn();
       return;
@@ -113,20 +122,17 @@ export class GameState {
       const opponentPiece = desPostion.piece;
       // move opponent piece to start position
       console.log(opponentPiece + " was killed");
-      const otherP = this.pieces[opponentPiece];
-      this.onNotifyEvt("move", {
-        name: desPostion.piece,
-        position: otherP.startPosition,
-      });
+      this.onNotifyEvt("kill", desPostion.piece);
       this.updatePosition(null, currentIndex + step);
-      this.updateState(opponentPiece, "out-board");
+      this.updateState(opponentPiece, STATE.out_board);
       await sleep(500);
     }
     // move your piece to destination position
     // notifyEvt(name, desPostion);
     this.onNotifyEvt("move", {
       name,
-      position: desPostion,
+      from: currentIndex,
+      to: currentIndex + step
     });
     console.log("move " + name + " to " + (currentIndex + step));
     this.updatePosition(name, currentIndex + step);
@@ -142,10 +148,7 @@ export class GameState {
     this.updateState(name, "finish");
     this.updatePosition(null, currentIndex);
     await sleep(500);
-    this.onNotifyEvt("pieceFinish", {
-      name,
-      position: this.pieces[name].finishPosition,
-    });
+    this.onNotifyEvt("pieceFinish", name);
     // add score to player base on rank of piece
     if (this.pieces[name].own === "t1") this.t1Score += this.scoreRank;
     else this.t2Score += this.scoreRank;
@@ -156,9 +159,9 @@ export class GameState {
       isT2Finish = true;
     for (const key in this.pieces) {
       const piece = this.pieces[key];
-      if (piece.own === "t1" && piece.state !== "finish" && isT1Finish)
+      if (piece.own === "t1" && piece.state !== STATE.finish && isT1Finish)
         isT1Finish = false;
-      if (piece.own === "t2" && piece.state !== "finish" && isT2Finish)
+      if (piece.own === "t2" && piece.state !== STATE.finish && isT2Finish)
         isT2Finish = false;
     }
     if (isT1Finish || isT2Finish) {
@@ -248,7 +251,7 @@ export class GameState {
       if (this.mapDataGrid[index].piece) delete this.mapDataGrid[index].piece;
     }
   }
-  updateState(name: string, state: "on-board" | "out-board" | "finish") {
+  updateState(name: string, state: IState) {
     this.pieces[name].state = state;
   }
   getCurrPosition(name: string) {
@@ -267,7 +270,7 @@ export class GameState {
       this.notifyEvt[eventName](data);
     }
   }
-  setTurn(turn: "t1" | "t2") {
+  setTurn(turn: ITurn) {
     this.userTurn = turn;
   }
 }

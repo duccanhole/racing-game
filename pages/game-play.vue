@@ -22,8 +22,3 @@ onMounted(() => {
   new Phaser.Game(config);
 });
 </script>
-<style scoped>
-.game-screen > canvas {
-  border-radius: 15px !important;
-}
-</style>
